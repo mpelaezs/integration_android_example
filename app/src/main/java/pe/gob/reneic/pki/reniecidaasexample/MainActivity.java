@@ -28,7 +28,7 @@ import pe.gob.reneic.pki.idaas.sdk.interfaces.ITokenResponse;
 import pe.gob.reneic.pki.idaas.sdk.interfaces.IUserinfoResponse;
 import pe.gob.reneic.pki.reniecidaasexample.common.Constants;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends ParentActivity {
 
     private static final String TAG = "MainActivity";
     private Button btnLogin = null;
@@ -65,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
 
                 webView.setVisibility(View.VISIBLE);
                 webView.loadUrl(oClient.getLoginUrl());
+
                 webView.setWebViewClient(new WebViewClient() {
                     @Override
                     public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
@@ -91,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
         String stateResponse = uri.getQueryParameter("state");
         String code = uri.getQueryParameter("code");
 
-        webView.setVisibility(View.GONE);
+        webView.setVisibility(View.INVISIBLE);
 
         try {
             if (error == null && code != null && stateResponse.equals(state)) {
@@ -131,29 +132,4 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private ReniecIdaasClient getIdaasClient() {
-        try {
-            InputStream file = getResources().openRawResource(getResources().getIdentifier("reniec_idaas", "raw", getPackageName()));
-            ReniecIdaasClient oClient = new ReniecIdaasClient(file);
-
-            String state = Base64.encodeToString(String.valueOf(System.currentTimeMillis()).getBytes(), Base64.NO_WRAP);
-
-            oClient.setRedirectUri(Constants.redirectUri);
-            oClient.setAcr(Acr.ONE_FACTOR);
-            oClient.addScope(Scope.PROFILE);
-            oClient.addScope(Scope.EMAIL);
-            oClient.addScope(Scope.PHONE);
-            oClient.setState(state);
-
-            return oClient;
-        } catch (Exception ex) {
-            StringWriter sw = new StringWriter();
-            ex.printStackTrace(new PrintWriter(sw));
-
-            Log.e(TAG, ex.getMessage());
-            Log.e(TAG, sw.toString());
-        }
-
-        return null;
-    }
 }
