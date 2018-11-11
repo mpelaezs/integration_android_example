@@ -12,7 +12,8 @@ public enum Acr {
     TWO_FACTOR("two_factor"),
     PKI_DNIE("pki_dnie"),
     PKI_TOKEN("pki_token"),
-    ONLY_PASSWORD("only_password");
+    ONLY_PASSWORD("only_password"),
+    ONLY_QUESTIONS("only_questions");
 
     private String value;
     private static final Map<String, Acr> lookup = new HashMap<>();
