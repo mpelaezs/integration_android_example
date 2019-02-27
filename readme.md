@@ -1,8 +1,11 @@
 # RENIEC IDaaS integration with Android
-With this example you can connect with our Identity as a Service (IDaaS).
+With this client you can connect with our solution of Identity as a Service (IDaaS) that implements OpenID Connect.
 
 More project details:
 https://idaas.reniec.gob.pe/site/
+
+Demo online:
+https://dsp.reniec.gob.pe/rp/
 
 ## Basic params
 #### Scopes
@@ -18,23 +21,36 @@ https://idaas.reniec.gob.pe/site/
 - offline_access
     - Offline access for a month.
 	
-
 #### ACR
+##### Level 0:
+- only_questions
+    - Access only with secret questions.	
+
+##### Level 1:
 - one_factor
     - Access with Clave Nacional | OTP Email | OTP SMS.
-	
+    
+- only_password
+    - Access only with Clave Nacional.
+
+##### Level 2:
 - two_factor
     - Access with Clave Nacional + OTP Email | OTP SMS.
-	
+    
+- fingerprint_mobile
+    - Access with Biometric Validation and secret questions.
+
+##### Level 3:
 - pki_dnie
     - Access with DNIe.
+
+- pki_dnie_mobile
+    - Access with DNIe Mobile (only for android devices).
 	
 - pki_token
     - Access with PJ digital certificate.
-	
-- only_password
-    - Access only with Clave Nacional.
-	
-- only_questions
-    - Access only with secret questions.
-	
+
+# More params
+If you want more params details, you can find it into OpenID Connect documentation:
+
+https://openid.net/specs/openid-connect-core-1_0.html
