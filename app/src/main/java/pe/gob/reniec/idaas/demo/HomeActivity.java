@@ -11,10 +11,11 @@ import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.TextView;
 
-import pe.gob.reniec.idaas.demo.R;
+import com.google.gson.Gson;
+
+import pe.gob.reniec.idaas.demo.common.Constants;
 import pe.gob.reniec.idaas.sdk.ReniecIdaasClient;
 import pe.gob.reniec.idaas.sdk.dto.User;
-import pe.gob.reniec.idaas.demo.common.Constants;
 
 /**
  * Created by Miguel Pazo (http://miguelpazo.com)
@@ -48,14 +49,16 @@ public class HomeActivity extends ParentActivity {
 
         Intent intent = getIntent();
 
-        User user = intent.getParcelableExtra(Constants.EXTRA_USER_INFO);
+        Gson gson = new Gson();
+        String userExtra = intent.getStringExtra(Constants.EXTRA_USER_INFO);
+        User user = gson.fromJson(userExtra, User.class);
 
         tvDni.setText(user.getDoc());
         tvFirstName.setText(user.getFirstName());
         tvPhone.setText(user.getPhoneNumber());
-        tvPhoneVerified.setText(user.getPhoneNumberVerified().toString());
+        tvPhoneVerified.setText(user.getPhoneNumberVerified() != null ? user.getPhoneNumberVerified().toString() : "");
         tvEmail.setText(user.getEmail());
-        tvEmailVerified.setText(user.getEmailVerified().toString());
+        tvEmailVerified.setText(user.getEmailVerified() != null ? user.getEmailVerified().toString() : "");
         tvSub.setText(user.getSub());
 
         final ReniecIdaasClient oClient = getIdaasClient();
@@ -69,7 +72,6 @@ public class HomeActivity extends ParentActivity {
                 webView.setWebViewClient(new WebViewClient() {
                     @Override
                     public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                        view.loadUrl(request.getUrl().toString());
                         return false;
                     }
 

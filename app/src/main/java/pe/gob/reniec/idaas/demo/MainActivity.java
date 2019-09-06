@@ -1,6 +1,7 @@
 package pe.gob.reniec.idaas.demo;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,9 +13,13 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
+import android.widget.Toast;
+
+import com.google.gson.Gson;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.List;
 
 import pe.gob.reniec.idaas.demo.common.Constants;
 import pe.gob.reniec.idaas.sdk.ReniecIdaasClient;
@@ -64,14 +69,41 @@ public class MainActivity extends ParentActivity {
                 webView.setWebViewClient(new WebViewClient() {
                     @Override
                     public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                        view.loadUrl(request.getUrl().toString());
+                        String url = request.getUrl().toString();
+
+                        if (url.startsWith("intent://")) {
+                            Uri uriParsed = Uri.parse(url);
+                            String uriFragment = uriParsed.getFragment();
+
+                            String appPackage = getPart(uriFragment, "package=", ";");
+                            String name = getPart(uriFragment, "S.name=", ";S.code=");
+                            String code = getPart(uriFragment, "S.code=", ";end");
+
+                            Intent intent = new Intent();
+                            intent.setAction(appPackage.concat(".shared"));
+                            intent.setType("text/plain");
+                            intent.putExtra(Constants.EXTRA_CODE, code);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+                            PackageManager packageManager = getPackageManager();
+                            List activities = packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+
+                            if (activities.size() > 0) {
+                                getBaseContext().startActivity(intent);
+                            } else {
+                                Toast.makeText(getBaseContext(), "Debes instalar la app ".concat(name).concat("."), Toast.LENGTH_SHORT).show();
+                                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=".concat(appPackage))));
+                            }
+
+                            return true;
+                        }
+
                         return false;
                     }
 
                     @Override
                     public void onPageFinished(WebView view, String url) {
                         super.onPageFinished(view, url);
-                        Log.d("===>", url);
 
                         if (url.indexOf(Constants.redirectUri) == 0) {
                             Uri uri = Uri.parse(url);
@@ -101,7 +133,8 @@ public class MainActivity extends ParentActivity {
                             @Override
                             public void result(User oUser) {
                                 Intent intent = new Intent(MainActivity.this, HomeActivity.class);
-                                intent.putExtra(Constants.EXTRA_USER_INFO, oUser);
+                                Gson gson = new Gson();
+                                intent.putExtra(Constants.EXTRA_USER_INFO, gson.toJson(oUser));
 
                                 startActivity(intent);
                             }
@@ -128,4 +161,10 @@ public class MainActivity extends ParentActivity {
         }
     }
 
+    private String getPart(String data, String begin, String end) {
+        String result = data.substring(data.indexOf(begin) + begin.length());
+        result = result.substring(0, result.indexOf(end));
+
+        return result;
+    }
 }
